@@ -1,3 +1,4 @@
+
 // Simple command-line kernel monitor useful for
 // controlling the kernel and exploring the system interactively.
 
@@ -24,6 +25,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "backtrace", "",mon_backtrace}
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -57,6 +59,22 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
+	cprintf("Stack backtrace:\n");
+	int *ebp = (int*)read_ebp(); //%ebp saved the address
+	while(ebp){
+		struct Eipdebuginfo info;
+		debuginfo_eip(*(ebp+1),&info);
+		cprintf("ebp %08x eip %08x args %08x %08x %08x %08x %08x \n",
+			ebp, *(ebp+1),*(ebp+2),*(ebp+3),*(ebp+4),*(ebp+5),*(ebp+6));
+		cprintf("\t%s:%d: %.*s+%d\n",
+			info.eip_file, 
+			info.eip_line,
+			info.eip_fn_namelen,
+			info.eip_fn_name,
+			-info.eip_fn_addr+*(ebp+1));
+		ebp = (int*)*ebp; // last ebp(saved ebp)
+		
+	}
 	// Your code here.
 	return 0;
 }
