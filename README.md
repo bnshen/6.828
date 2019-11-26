@@ -2,4 +2,4 @@ this is a repo for MIT's 6.828 [Operating Systems Engineering](https://pdos.csai
 
 Lab1: complete
 
-Lab2: proceeding
+Lab2: complete, [notes](./notes/lab2.md)
