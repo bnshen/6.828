@@ -4,4 +4,4 @@ Lab1: complete
 
 Lab2: complete, [notes](./notes/lab2.md)
 
-Lab3: proceedings
+Lab3: proceedin...
