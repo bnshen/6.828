@@ -41,7 +41,54 @@
 	pushl $(num);							\
 	jmp _alltraps
 
-.text
+.data
+TRAPHANDLER_NOEC(handler0,0)
+TRAPHANDLER(handler1,1)
+TRAPHANDLER(handler2,2)
+TRAPHANDLER(handler3,3)
+TRAPHANDLER(handler4,4)
+TRAPHANDLER(handler5,5)
+TRAPHANDLER(handler6,6)
+TRAPHANDLER(handler7,7)
+TRAPHANDLER(handler8,8)
+TRAPHANDLER(handler9,9)
+TRAPHANDLER(handler10,10)
+TRAPHANDLER(handler11,11)
+TRAPHANDLER(handler12,12)
+TRAPHANDLER(handler13,13)
+TRAPHANDLER(handler14,14)
+TRAPHANDLER(handler15,15)
+TRAPHANDLER(handler16,16)
+TRAPHANDLER(handler17,17)
+TRAPHANDLER(handler18,18)
+TRAPHANDLER(handler19,19)
+
+.data
+.globl handlers
+handlers:
+	.long handler0
+	.long handler1
+	.long handler2
+	.long handler3
+	.long handler4
+	.long handler5
+	.long handler6
+	.long handler7
+	.long handler8
+	.long handler9
+	.long handler10
+	.long handler11
+	.long handler12
+	.long handler13
+	.long handler14
+	.long handler15
+	.long handler16
+	.long handler17
+	.long handler18
+	.long handler19
+	
+	
+
 
 /*
  * Lab 3: Your code here for generating entry points for the different traps.
@@ -53,3 +100,17 @@
  * Lab 3: Your code here for _alltraps
  */
 
+.data
+.globl _alltraps
+_alltraps:
+	pushl %ds
+  	pushl %es
+	pushal
+
+	movw $(GD_KD), %ax
+	movw %ax, %ds
+	movw %ax, %es
+
+	push %esp
+	call trap
+		
