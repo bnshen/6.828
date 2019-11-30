@@ -21,71 +21,58 @@
  * where NAME is the argument passed to TRAPHANDLER.
  */
 #define TRAPHANDLER(name, num)						\
+	.text;\
 	.globl name;		/* define global symbol for 'name' */	\
 	.type name, @function;	/* symbol type is function */		\
 	.align 2;		/* align function definition */		\
 	name:			/* function starts here */		\
 	pushl $(num);							\
-	jmp _alltraps
+	jmp _alltraps;	\
+	.data;	\
+		.long name;
 
 /* Use TRAPHANDLER_NOEC for traps where the CPU doesn't push an error code.
  * It pushes a 0 in place of the error code, so the trap frame has the same
  * format in either case.
  */
 #define TRAPHANDLER_NOEC(name, num)					\
+	.text;\
 	.globl name;							\
 	.type name, @function;						\
 	.align 2;							\
 	name:								\
 	pushl $0;							\
 	pushl $(num);							\
-	jmp _alltraps
+	jmp _alltraps;	\
+	.data;\
+	.long name;
 
-.data
-TRAPHANDLER_NOEC(handler0,0)
-TRAPHANDLER(handler1,1)
-TRAPHANDLER(handler2,2)
-TRAPHANDLER(handler3,3)
-TRAPHANDLER(handler4,4)
-TRAPHANDLER(handler5,5)
-TRAPHANDLER(handler6,6)
-TRAPHANDLER(handler7,7)
-TRAPHANDLER(handler8,8)
-TRAPHANDLER(handler9,9)
-TRAPHANDLER(handler10,10)
-TRAPHANDLER(handler11,11)
-TRAPHANDLER(handler12,12)
-TRAPHANDLER(handler13,13)
-TRAPHANDLER(handler14,14)
-TRAPHANDLER(handler15,15)
-TRAPHANDLER(handler16,16)
-TRAPHANDLER(handler17,17)
-TRAPHANDLER(handler18,18)
-TRAPHANDLER(handler19,19)
 
 .data
 .globl handlers
 handlers:
-	.long handler0
-	.long handler1
-	.long handler2
-	.long handler3
-	.long handler4
-	.long handler5
-	.long handler6
-	.long handler7
-	.long handler8
-	.long handler9
-	.long handler10
-	.long handler11
-	.long handler12
-	.long handler13
-	.long handler14
-	.long handler15
-	.long handler16
-	.long handler17
-	.long handler18
-	.long handler19
+TRAPHANDLER_NOEC(handler0, T_DIVIDE)
+TRAPHANDLER_NOEC(handler1, T_DEBUG)
+TRAPHANDLER_NOEC(handler2, T_NMI)
+TRAPHANDLER_NOEC(handler3, T_BRKPT)
+TRAPHANDLER_NOEC(handler4, T_OFLOW)
+TRAPHANDLER_NOEC(handler5, T_BOUND)
+TRAPHANDLER_NOEC(handler6, T_ILLOP)
+TRAPHANDLER_NOEC(handler7, T_DEVICE)
+TRAPHANDLER(handler8, T_DBLFLT)
+TRAPHANDLER(handler9, 9) // 9 deprecated since 386
+TRAPHANDLER(handler10, T_TSS)
+TRAPHANDLER(handler11, T_SEGNP)
+TRAPHANDLER(handler12, T_STACK)
+TRAPHANDLER(handler13, T_GPFLT)
+TRAPHANDLER(handler14, T_PGFLT)
+TRAPHANDLER(handler15, 15) // 15 reserved by intel
+TRAPHANDLER_NOEC(handler16, T_FPERR)
+TRAPHANDLER(handler17, T_ALIGN)
+TRAPHANDLER_NOEC(handler18, T_MCHK)
+TRAPHANDLER_NOEC(handler19, T_SIMDERR)
+TRAPHANDLER_NOEC(handler48, T_SYSCALL)
+
 	
 	
 

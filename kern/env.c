@@ -288,10 +288,10 @@ region_alloc(struct Env *e, void *va, size_t len)
 	//   You should round va down, and round (va + len) up.
 	//   (Watch out for corner-cases!)
 	void *start = ROUNDDOWN(va, PGSIZE);
-	size_t size = ROUNDUP(len, PGSIZE) / PGSIZE;
-	size_t i = 0;
+	size_t size = ROUNDUP((uintptr_t)va + len, PGSIZE);
+	size_t i = (uintptr_t)start;
 	struct PageInfo *pg;
-	for (; i < size; i++)
+	for (; i < size; i += PGSIZE)
 	{
 		pg = page_alloc(0);
 		if (pg == NULL)
@@ -301,7 +301,7 @@ region_alloc(struct Env *e, void *va, size_t len)
 		//cprintf("region_alloc: %x \n",start);
 		start += PGSIZE;
 	}
-	// cprintf("region_alloc, va:%x, len:%d \n",va,len);
+	// cprintf("region_alloc, va:%x, len:%d, size:%d \n", va, len, size);
 }
 
 //
