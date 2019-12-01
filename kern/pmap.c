@@ -657,7 +657,7 @@ static uintptr_t user_mem_check_addr;
 int user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
 	// LAB 3: Your code here.
-	cprintf("usermem check, va: %x, len:%d \n", va, len);
+	// cprintf("usermem check, va: %x, len:%d \n", va, len);
 	pte_t *pte;
 	len += PGSIZE * (ROUNDUP(len + va, PGSIZE) - ROUNDUP(va, PGSIZE));
 	for (int i = 0; i <= len; i += PGSIZE)

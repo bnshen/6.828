@@ -193,40 +193,32 @@ trap_dispatch(struct Trapframe *tf)
 	// LAB 4: Your code here.
 
 	// Unexpected trap: The user process or the kernel has a bug.
-	print_trapframe(tf);
-	if (tf->tf_cs == GD_KT)
-		panic("unhandled trap in kernel");
-	else
+	switch (tf->tf_trapno)
 	{
-		env_destroy(curenv);
-		return;
-		switch (tf->tf_trapno)
+	case T_PGFLT:
+		page_fault_handler(tf);
+		break;
+	case T_BRKPT:
+		monitor(tf);
+		break;
+	case T_SYSCALL:
+		tf->tf_regs.reg_eax = syscall(tf->tf_regs.reg_eax,
+									  tf->tf_regs.reg_edx,
+									  tf->tf_regs.reg_ecx,
+									  tf->tf_regs.reg_ebx,
+									  tf->tf_regs.reg_edi,
+									  tf->tf_regs.reg_esi);
+		break;
+	default:
+		print_trapframe(tf);
+		cprintf("unseen no: %d \n", tf->tf_trapno);
+		// Unexpected trap: The user process or the kernel has a bug.
+		if (tf->tf_cs == GD_KT)
+			panic("unhandled trap in kernel");
+		else
 		{
-		case T_PGFLT:
-			page_fault_handler(tf);
-			break;
-		case T_BRKPT:
-			monitor(tf);
-			break;
-		case T_SYSCALL:
-			tf->tf_regs.reg_eax = syscall(tf->tf_regs.reg_eax,
-										  tf->tf_regs.reg_edx,
-										  tf->tf_regs.reg_ecx,
-										  tf->tf_regs.reg_ebx,
-										  tf->tf_regs.reg_edi,
-										  tf->tf_regs.reg_esi);
-			break;
-		default:
-			print_trapframe(tf);
-			cprintf("unseen no: %d \n", tf->tf_trapno);
-			// Unexpected trap: The user process or the kernel has a bug.
-			if (tf->tf_cs == GD_KT)
-				panic("unhandled trap in kernel");
-			else
-			{
-				env_destroy(curenv);
-				return;
-			}
+			env_destroy(curenv);
+			return;
 		}
 	}
 }
@@ -252,7 +244,7 @@ void trap(struct Trapframe *tf)
 	// the interrupt path.
 	assert(!(read_eflags() & FL_IF));
 
-	cprintf("Incoming TRAP frame at %p\n", tf);
+	// cprintf("Incoming TRAP frame at %p\n", tf);
 
 	if ((tf->tf_cs & 3) == 3)
 	{
@@ -261,6 +253,7 @@ void trap(struct Trapframe *tf)
 		// serious kernel work.
 		// LAB 4: Your code here.
 		assert(curenv);
+		lock_kernel();
 
 		// Garbage collect if current enviroment is a zombie
 		if (curenv->env_status == ENV_DYING)
@@ -304,14 +297,14 @@ void page_fault_handler(struct Trapframe *tf)
 	// Handle kernel-mode page faults.
 	// LAB 3: Your code here.
 	if (tf->tf_cs == GD_KT)
-		panic("unhandled trap in kernel");
+	{
+		panic("kernel page fault");
+		struct PageInfo *pg = page_alloc(ALLOC_ZERO);
+		assert(pg);
+		page_insert(curenv->env_pgdir, pg, (void *)fault_va, PTE_U | PTE_P);
+		return;
+	}
 
-#if 0
-	struct PageInfo *pg = page_alloc(ALLOC_ZERO);
-	assert(pg);
-	page_insert(curenv->env_pgdir, pg, (void *)fault_va, PTE_U | PTE_P);
-	return;
-#endif
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
 

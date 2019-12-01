@@ -84,7 +84,15 @@ sys_exofork(void)
 	// will appear to return 0.
 
 	// LAB 4: Your code here.
-	panic("sys_exofork not implemented");
+	struct Env *e;
+	int ret = env_alloc(&e, thiscpu->cpu_env->env_id);
+	if (ret != 0)
+		return ret;
+	e->env_tf = thiscpu->cpu_env->env_tf;
+	e->env_tf.tf_regs.reg_eax = 0;
+	return e->env_id;
+
+	// panic("sys_exofork not implemented");
 }
 
 // Set envid's env_status to status, which must be ENV_RUNNABLE
@@ -104,7 +112,15 @@ sys_env_set_status(envid_t envid, int status)
 	// envid's status.
 
 	// LAB 4: Your code here.
-	panic("sys_env_set_status not implemented");
+	struct Env *e;
+	int ret = envid2env(envid, e, 1);
+	if (ret)
+		return ret;
+	if (e->env_status != ENV_RUNNABLE || e->env_status != ENV_NOT_RUNNABLE)
+		return -E_INVAL;
+	e->env_status = status;
+	return 0;
+	// panic("sys_env_set_status not implemented");
 }
 
 // Set the page fault upcall for 'envid' by modifying the corresponding struct
@@ -170,7 +186,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 //	-E_NO_MEM if there's no memory to allocate any necessary page tables.
 static int
 sys_page_map(envid_t srcenvid, void *srcva,
-	     envid_t dstenvid, void *dstva, int perm)
+			 envid_t dstenvid, void *dstva, int perm)
 {
 	// Hint: This function is a wrapper around page_lookup() and
 	//   page_insert() from kern/pmap.c.
@@ -271,12 +287,12 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 	// Return any appropriate return value.
 	// LAB 3: Your code here.
 
-	int32_t retVal;
+	int32_t retVal = 0;
 	switch (syscallno)
 	{
 	case SYS_cputs:
 		sys_cputs((const char *)a1, (size_t)a2);
-		return 0;
+		break;
 	case SYS_cgetc:
 		retVal = sys_cgetc();
 		break;
@@ -285,6 +301,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 		break;
 	case SYS_getenvid:
 		retVal = sys_getenvid();
+		break;
+	case SYS_yield:
+		sys_yield();
 		break;
 	default:
 		retVal = -E_INVAL;

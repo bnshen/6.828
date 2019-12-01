@@ -543,16 +543,18 @@ void env_run(struct Env *e)
 	//	e->env_tf to sensible values.
 
 	// LAB 3: Your code here.
-	if (curenv)
+	if (curenv != e)
 	{
-		if (curenv->env_status == ENV_RUNNING)
+		if (curenv && curenv->env_status == ENV_RUNNING)
 			curenv->env_status = ENV_RUNNABLE;
 		else
-			cprintf("curenv status: \n", curenv->env_status);
+			;
+		//cprintf("curenv status: \n", curenv->env_status);
+		curenv = e;
+		curenv->env_status = ENV_RUNNING;
+		curenv->env_runs++;
+		lcr3(PADDR(curenv->env_pgdir));
 	}
-	curenv = e;
-	curenv->env_status = ENV_RUNNING;
-	curenv->env_runs++;
-	lcr3(PADDR(curenv->env_pgdir));
+	unlock_kernel();
 	env_pop_tf(&curenv->env_tf);
 }
