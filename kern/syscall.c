@@ -136,7 +136,15 @@ static int
 sys_env_set_pgfault_upcall(envid_t envid, void *func)
 {
 	// LAB 4: Your code here.
-	panic("sys_env_set_pgfault_upcall not implemented");
+	struct Env *e;
+	if (envid2env(envid, &e, true))
+		return -E_BAD_ENV;
+	e->env_pgfault_upcall = func;
+	// cprintf("set upcall succeed \n");
+	assert(e->env_pgfault_upcall);
+	return 0;
+
+	// panic("sys_env_set_pgfault_upcall not implemented");
 }
 
 // Allocate a page of memory and map it at 'va' with permission
@@ -166,6 +174,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 	//   allocated!
 
 	// LAB 4: Your code here.
+
 	if ((uintptr_t)va >= UTOP || (uintptr_t)va % PGSIZE)
 		return -E_INVAL;
 	if (PTE_U & perm && PTE_P & perm)
@@ -376,6 +385,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 		break;
 	case SYS_page_unmap:
 		retVal = sys_page_unmap(a1, (void *)a2);
+		break;
+	case SYS_env_set_pgfault_upcall:
+		retVal = sys_env_set_pgfault_upcall(a1, (void *)a2);
 		break;
 	default:
 		retVal = -E_INVAL;
