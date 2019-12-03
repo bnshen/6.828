@@ -356,7 +356,6 @@ void page_fault_handler(struct Trapframe *tf)
 		tf->tf_esp = tf->tf_esp - 4 - sizeof(struct UTrapframe);
 	else
 		tf->tf_esp = UXSTACKTOP - sizeof(struct UTrapframe);
-	assert(tf->tf_esp >= UXSTACKTOP - PGSIZE);
 	tf->tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
 	user_mem_assert(curenv, (void *)tf->tf_esp, sizeof(struct UTrapframe), PTE_U | PTE_W | PTE_P);
 	struct UTrapframe *utf = (struct UTrapframe *)tf->tf_esp;
