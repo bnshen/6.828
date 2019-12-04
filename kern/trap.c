@@ -73,6 +73,14 @@ void trap_init(void)
 	SETGATE(idt[T_SYSCALL], 0, GD_KT, handlers[20], 3);
 
 	SETGATE(idt[3], 1, GD_KT, handlers[3], 3);
+	SETGATE(idt[T_PGFLT], 0, GD_KT, handlers[T_PGFLT], 0);
+
+	SETGATE(idt[IRQ_OFFSET + IRQ_TIMER], 0, GD_KT, handlers[21], 0);
+	SETGATE(idt[IRQ_OFFSET + IRQ_KBD], 0, GD_KT, handlers[22], 0);
+	SETGATE(idt[IRQ_OFFSET + IRQ_SERIAL], 0, GD_KT, handlers[23], 0);
+	SETGATE(idt[IRQ_OFFSET + IRQ_SPURIOUS], 0, GD_KT, handlers[24], 0);
+	SETGATE(idt[IRQ_OFFSET + IRQ_IDE], 0, GD_KT, handlers[25], 0);
+	SETGATE(idt[IRQ_OFFSET + IRQ_ERROR], 0, GD_KT, handlers[26], 0);
 	// Per-CPU setup
 	trap_init_percpu();
 }
@@ -208,6 +216,12 @@ trap_dispatch(struct Trapframe *tf)
 									  tf->tf_regs.reg_ebx,
 									  tf->tf_regs.reg_edi,
 									  tf->tf_regs.reg_esi);
+		break;
+	case IRQ_OFFSET + IRQ_TIMER:
+		cprintf("hardware timer interrupt \n");
+		lapic_eoi();
+		sched_yield();
+		cprintf("hardware timer interrupt 2\n");
 		break;
 	default:
 		print_trapframe(tf);

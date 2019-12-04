@@ -49,15 +49,16 @@ void sched_yield(void)
 				break;
 			}
 		}
+		// cprintf("1\n");
 		if (nextrun == NULL && lastrun->env_status == ENV_RUNNING)
 			nextrun = lastrun;
 	}
+	cprintf("1\n");
 	if (nextrun)
 		env_run(nextrun);
 	// sched_halt never returns
 	sched_halt();
 }
-
 // Halt this CPU when there is nothing to do. Wait until the
 // timer interrupt wakes it up. This function never returns.
 //
@@ -100,7 +101,7 @@ void sched_halt(void)
 		"pushl $0\n"
 		"pushl $0\n"
 		// Uncomment the following line after completing exercise 13
-		//"sti\n"
+		"sti\n"
 		"1:\n"
 		"hlt\n"
 		"jmp 1b\n"
